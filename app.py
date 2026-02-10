@@ -1,37 +1,46 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Configure Gemini
-genai.configure(api_key="AIzaSyBIZASc3i7WggMaityBq93UUt_cdTknFPQ")
+# -----------------------
+# Configure Gemini API
+# -----------------------
+genai.configure(api_key="AIzaSyBdvd5C_2tmQXlP0STJ_zUkGxLV7xSxG6M")
 
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
-st.set_page_config(page_title="Gemini Chatbot")
-st.title("🤖 natham AI Chatbot")
+# -----------------------
+# Streamlit UI
+# -----------------------
+st.set_page_config(page_title="Gemini Chatbot", page_icon="🤖")
+st.title("🤖 Gemini Chatbot")
 
-# Chat history
+# Initialize chat history
+if "chat" not in st.session_state:
+    st.session_state.chat = model.start_chat(history=[])
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat messages
+# Display chat history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
 # User input
-user_input = st.chat_input("Ask something...")
+prompt = st.chat_input("Type your message...")
 
-if user_input:
+if prompt:
     # Show user message
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.markdown(user_input)
+        st.markdown(prompt)
 
     # Gemini response
-    response = model.generate_content(user_input)
-    bot_reply = response.text
+    response = st.session_state.chat.send_message(prompt)
 
     # Show assistant message
-    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+    st.session_state.messages.append(
+        {"role": "assistant", "content": response.text}
+    )
     with st.chat_message("assistant"):
-        st.markdown(bot_reply)
+        st.markdown(response.text)
